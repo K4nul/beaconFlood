@@ -1,4 +1,38 @@
+#include "CMac.h"
 #include <iostream>
+
+
+enum tagParameter {
+	TAGSSIDPARAMETERSET = 0,
+	TAGSUPPORTEDRATED = 1,
+	TAGDSPARAMETERSET = 3,
+	TAGTRAFFICINDICATIONMAP = 5,
+	TAGCOUNTRYINFORMATION = 7,
+	TAGQBSSLOADELEMENT = 11,
+	TAGHTCAPABILITIES = 45,
+	TAGRSNINFORMATION = 48,
+	TAGHTINFORMATION = 61,
+	TAGVENDORSPECIFIC = 221
+};
+
+
+struct ST_FIXED_PARAMETER
+{
+	u_int8_t timestamp[8];
+	u_int16_t beaconInterval;
+	u_int16_t capabilityInfo;
+};
+
+struct ST_BEACON_FRAME
+{
+	u_int16_t frameControl; 
+	u_int16_t duration;
+	Mac destinationAddr;
+	Mac sourceAddr;
+	Mac bssid;
+	u_int16_t seqFragNum;
+
+};
 
 struct ST_IEEE80211_RADIOTAP_HEADER 
 {
@@ -10,41 +44,32 @@ struct ST_IEEE80211_RADIOTAP_HEADER
 	u_int8_t		dataRate;
 	u_int16_t		channelFrequency;
 	u_int16_t		channelFlags;  
-	u_int8_t		antennaSignal; //PWR
+	int8_t			antennaSignal; 
 	u_int8_t		antenna;
 	u_int16_t		rxFlags; 
-	u_int8_t		antennaSignalT;
+	int8_t			antennaSignalT;
 	u_int8_t		antennaT;
+
 };
 
-struct ST_BEACON_FRAME
+struct ST_WIRELESS_PACKET 
 {
-	u_int16_t frameControl; //0x0008
-	u_int16_t duration;
-	u_int8_t destinationAddr[6];
-	u_int8_t sourceAddr[6];
-	u_int8_t bssid[6];
-	u_int16_t seqNum;
-};
-
-struct ST_WIRELESS_MANAGER
-{
-	u_int8_t timestamp[8];
-	u_int16_t beaconInterval;
-	u_int16_t capabilityInfo;
-};
-
-struct ST_SSID_PARAMETER
-{
-	u_int8_t tagName;
-	u_int8_t tagLength;
-};
-
-struct ST_WIRELESS_PACKET
-{
-	ST_IEEE80211_RADIOTAP_HEADER ieee80211RadiotapHeader;
+	ST_IEEE80211_RADIOTAP_HEADER radioTapHeader;
 	ST_BEACON_FRAME beaconFrame;
-	ST_WIRELESS_MANAGER wirelessManager;
-	ST_SSID_PARAMETER ssidParameter;
+	ST_FIXED_PARAMETER fixedParameter;
+
 };
+
+struct ST_TAG_PARAMETER
+{
+	u_int8_t tagNumber;
+	u_int8_t tagLength;
+
+	void* valuePointer(ST_TAG_PARAMETER* tagPointer);
+	ST_TAG_PARAMETER* getNextTag();
+	static ST_TAG_PARAMETER* getFirstTag(const u_char * tagPointer);
+};
+
+
+
 

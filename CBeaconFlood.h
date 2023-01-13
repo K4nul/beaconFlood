@@ -1,3 +1,4 @@
+#include "CMac.h"
 #include "CWirelessPacket.h"
 #include <iostream>
 #include <fstream>
@@ -31,7 +32,9 @@ private:
 	
 	pcap_t* pcap;	
     std::vector<std::string> vecSsidList;
-    std::vector<const u_char*> packetInfo;
+    std::vector<u_char*> vecPacketInfo;
+    std::vector<u_int8_t> vecPacketLength;
+    
     ST_PARAM param;
     
 
@@ -45,6 +48,6 @@ private:
 
 
     void readSsidList();
-    void makePacket();
+    void makePacket(std::string ssid);
     void sendPacket();    
 };

@@ -2,19 +2,20 @@ LDLIBS += -lpcap
 
 all: beaconFlood
 
-beaconFlood:  CWirelessPacket.o CBeaconFlood.o main.o CWirelessPacket.h CBeaconFlood.h
-	g++ -g CWirelessPacket.o CBeaconFlood.o main.o -o $@ -lncurses ${LDLIBS}  
+beaconFlood: CMac.o CWirelessPacket.o CBeaconFlood.o main.o  CMac.h CWirelessPacket.h CBeaconFlood.h
+	g++ -g CMac.o CWirelessPacket.o CBeaconFlood.o main.o -o $@ -lncurses ${LDLIBS}  
 
-CBeaconFlood.o : CWirelessPacket.h CBeaconFlood.h CBeaconFlood.cpp 
-	$(CC) -g -c -o $@ CBeaconFlood.cpp 
+CMac.o : CMac.h CMac.cpp 
+	g++ -g -c -o $@ CMac.cpp 
 
-CWirelessPacket.o : CWirelessPacket.h CWirelessPacket.cpp  
-	$(CC) -g -c -o $@  CWirelessPacket.cpp
+CWirelessPacket.o : CMac.h CWirelessPacket.h CWirelessPacket.cpp  
+	g++ -g -c -o $@  CWirelessPacket.cpp
 
-main.o: CBeaconFlood.h CWirelessPacket.h main.cpp 
-	$(CC) -g -c -o $@ main.cpp
+CBeaconFlood.o : CMac.h CWirelessPacket.h CBeaconFlood.h CBeaconFlood.cpp 
+	g++ -g -c -o $@ CBeaconFlood.cpp 
 
-
+main.o: CMac.h CBeaconFlood.h CWirelessPacket.h  main.cpp 
+	g++ -g -c -o $@ main.cpp
 
 clean:
 	rm -f beaconFlood *.o
