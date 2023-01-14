@@ -65,10 +65,21 @@ struct ST_TAG_PARAMETER
 	u_int8_t tagNumber;
 	u_int8_t tagLength;
 
-	void* valuePointer(ST_TAG_PARAMETER* tagPointer);
-	ST_TAG_PARAMETER* getNextTag();
-	static ST_TAG_PARAMETER* getFirstTag(const u_char * tagPointer);
 };
+
+struct ST_TAG_DS_PARAMETER : ST_TAG_PARAMETER
+{
+	u_int8_t tagDsParameter;
+
+};
+
+struct ST_TAG_SSID_PARAMETER : ST_TAG_PARAMETER
+{	
+	char ssid[];
+
+};
+
+
 
 
 

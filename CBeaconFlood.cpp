@@ -60,10 +60,10 @@ void CBeaconFlood::makePacket(std::string ssid)
 {
 
 	u_int8_t packetLength = 0;
-	u_char * packet;
+	u_char * packet = new u_char[sizeof(ST_WIRELESS_PACKET)+sizeof(ST_TAG_DS_PARAMETER)+sizeof(ST_TAG_SSID_PARAMETER)+ssid.length()];
 	ST_WIRELESS_PACKET * wirelessPacket = (ST_WIRELESS_PACKET*)packet;
-	
 
+	printf("%p\n", packet);
 	wirelessPacket->radioTapHeader.version = 0;
 	wirelessPacket->radioTapHeader.pad = 0;
 	wirelessPacket->radioTapHeader.len = 24;
@@ -102,49 +102,114 @@ void CBeaconFlood::makePacket(std::string ssid)
 	wirelessPacket->fixedParameter.capabilityInfo = 0x0011; 
 
 	packetLength += sizeof(ST_WIRELESS_PACKET);
-	printf("%d\n",packetLength);
-	u_char * fPointer = packet;
-	ST_TAG_PARAMETER* tag = ST_TAG_PARAMETER::getFirstTag(packet);
-	tag->tagNumber = tagParameter::TAGSSIDPARAMETERSET;
-	tag->tagLength = ssid.length();
-	memcpy(tag->valuePointer(tag),ssid.data(),ssid.size());
+	u_char * fPointer = packet + packetLength;
+	ST_TAG_DS_PARAMETER* tagDsParameter =  (ST_TAG_DS_PARAMETER*)fPointer;
 
-	packetLength += tag->tagLength + sizeof(ST_TAG_PARAMETER);
-	printf("%d\n",packetLength);
+	tagDsParameter->tagNumber = tagParameter::TAGDSPARAMETERSET;
+	tagDsParameter->tagLength = 1;
+	tagDsParameter->tagDsParameter = 1;
 
-	tag = tag->getNextTag();
+	packetLength += sizeof(ST_TAG_DS_PARAMETER);
 
-	tag->tagNumber = tagParameter::TAGSUPPORTEDRATED;
-	tag->tagLength = 8;
-	char supportedRate[8];
-	supportedRate[0] = 0x82;	
-	supportedRate[1] = 0x84;
-	supportedRate[2] = 0x88;
-	supportedRate[3] = 0x96;
-	supportedRate[4] = 0x24;
-	supportedRate[5] = 0x30;
-	supportedRate[6] = 0x48;
-	supportedRate[7] = 0x6C;
+	fPointer = packet + packetLength;
 
-	packetLength += tag->tagLength + sizeof(ST_TAG_PARAMETER);
-	memcpy(tag->valuePointer(tag),supportedRate,tag->tagLength);
+	ST_TAG_SSID_PARAMETER* tagSsidParameter = (ST_TAG_SSID_PARAMETER*)fPointer;
 
-	printf("%d\n",packetLength);
+	tagSsidParameter->tagNumber = tagParameter::TAGSSIDPARAMETERSET;
+	tagSsidParameter->tagLength = ssid.length();
+	memcpy(tagSsidParameter,ssid.data(),ssid.size());
+	packetLength += sizeof(ST_TAG_PARAMETER) + tagSsidParameter->tagLength;	
 
-	tag = tag->getNextTag();
 
-	tag->tagNumber = tagParameter::TAGDSPARAMETERSET;
-	tag->tagLength = 1;
-	u_int8_t tagDsParameter = 1;
+	vecPacketInfo.push_back(packet);		
+	vecPacketLength.push_back(packetLength);
 
-	packetLength += tag->tagLength + sizeof(ST_TAG_PARAMETER);	
-	memcpy(tag->valuePointer(tag),(char*)&tagDsParameter,tag->tagLength);
-	printf("%d\n",packetLength);
+
+	////////////////////////////////////////
+
+	// u_int8_t packetLength = 0;
+	// u_char * packet;
+	// ST_WIRELESS_PACKET * wirelessPacket = (ST_WIRELESS_PACKET*)packet;
+
+	// wirelessPacket->radioTapHeader.version = 0;
+	// wirelessPacket->radioTapHeader.pad = 0;
+	// wirelessPacket->radioTapHeader.len = 24;
+	// wirelessPacket->radioTapHeader.present[0] = 0x2e; //고치기
+	// wirelessPacket->radioTapHeader.present[1] = 0x40;
+	// wirelessPacket->radioTapHeader.present[2] = 0x00;
+	// wirelessPacket->radioTapHeader.present[3] = 0xa0;
+	// wirelessPacket->radioTapHeader.present[4] = 0x20;
+	// wirelessPacket->radioTapHeader.present[5] = 0x08;
+	// wirelessPacket->radioTapHeader.present[6] = 0x00;
+	// wirelessPacket->radioTapHeader.present[7] = 0x00;
+	// wirelessPacket->radioTapHeader.flags = 00;
+	// wirelessPacket->radioTapHeader.dataRate = 02;
+	// wirelessPacket->radioTapHeader.channelFrequency = 2412;
+	// wirelessPacket->radioTapHeader.channelFlags = 160;
+	// wirelessPacket->radioTapHeader.antennaSignal = -63;
+	// wirelessPacket->radioTapHeader.antenna = 00;
+	// wirelessPacket->radioTapHeader.rxFlags = 0000;
+	// wirelessPacket->radioTapHeader.antennaSignalT = -63; 
+	// wirelessPacket->radioTapHeader.antennaT =  00;
+	// wirelessPacket->beaconFrame.frameControl = 80;
+	// wirelessPacket->beaconFrame.duration = 0000;
+	// wirelessPacket->beaconFrame.destinationAddr =  Mac("FF:FF:FF:FF:FF:FF");// MAC BD
+	// wirelessPacket->beaconFrame.sourceAddr =  Mac("11:22:33:44:55:66");// MAC any
+	// wirelessPacket->beaconFrame.bssid =  Mac("11:22:33:44:55:66"); // MAC any 
+	// wirelessPacket->beaconFrame.seqFragNum = 0000; 
+	// wirelessPacket->fixedParameter.timestamp[0] = 0xab; //고치기
+	// wirelessPacket->fixedParameter.timestamp[1] = 0x45;
+	// wirelessPacket->fixedParameter.timestamp[2] = 0x09;
+	// wirelessPacket->fixedParameter.timestamp[3] = 0xf7;
+	// wirelessPacket->fixedParameter.timestamp[4] = 0x28;
+	// wirelessPacket->fixedParameter.timestamp[5] = 0x00;
+	// wirelessPacket->fixedParameter.timestamp[6] = 0x00;
+	// wirelessPacket->fixedParameter.timestamp[7] = 0x00;								
+	// wirelessPacket->fixedParameter.beaconInterval = 0x6400;
+	// wirelessPacket->fixedParameter.capabilityInfo = 0x0011; 
+
+	// packetLength += sizeof(ST_WIRELESS_PACKET);
+	// u_char * fPointer = packet;
+	// ST_TAG_PARAMETER* tag = ST_TAG_PARAMETER::getFirstTag(packet);	
+	// tag->tagNumber = tagParameter::TAGSSIDPARAMETERSET;
+	// tag->tagLength = ssid.length();
+	// memcpy(tag->valuePointer(tag),ssid.data(),ssid.size());
+
+	// packetLength += tag->tagLength + sizeof(ST_TAG_PARAMETER);
 
 	// tag = tag->getNextTag();
-	vecPacketLength.push_back(packetLength);
-	vecPacketInfo.push_back(fPointer);
 
+	// tag->tagNumber = tagParameter::TAGSUPPORTEDRATED;
+	// tag->tagLength = 8;
+	// char supportedRate[8];
+	// supportedRate[0] = 0x82;	
+	// supportedRate[1] = 0x84;
+	// supportedRate[2] = 0x88;
+	// supportedRate[3] = 0x96;
+	// supportedRate[4] = 0x24;
+	// supportedRate[5] = 0x30;
+	// supportedRate[6] = 0x48;
+	// supportedRate[7] = 0x6C;
+
+	// packetLength += tag->tagLength + sizeof(ST_TAG_PARAMETER);
+	// memcpy(tag->valuePointer(tag),supportedRate,tag->tagLength);
+
+
+	// tag = tag->getNextTag();
+
+	// tag->tagNumber = tagParameter::TAGDSPARAMETERSET;
+	// tag->tagLength = 1;
+	// u_int8_t tagDsParameter = 1;
+
+	// packetLength += tag->tagLength + sizeof(ST_TAG_PARAMETER);	
+	// memcpy(tag->valuePointer(tag),(char*)&tagDsParameter,tag->tagLength);
+
+
+
+	// vecPacketInfo.push_back(fPointer);		
+	// vecPacketLength.push_back(packetLength);
+
+	// tag = tag->getNextTag();
 	// tag->tagNumber = tagParameter::TAGTRAFFICINDICATIONMAP;
 	// tag->tagLength = 4;
 	// pointer = (u_char*)tag->valuePointer();
@@ -163,7 +228,7 @@ void CBeaconFlood::sendPacket()
 {
 
 	for(int i = 0 ; i < vecPacketInfo.size(); i ++){
-		int res = pcap_sendpacket(pcap, reinterpret_cast<const u_char*>(&vecPacketInfo[i]), vecPacketLength[i]+10);
+		int res = pcap_sendpacket(pcap, reinterpret_cast<const u_char*>(&vecPacketInfo[i]), vecPacketLength[i]);
 		if (res != 0) {
 			fprintf(stderr, "pcap_sendpacket return %d error=%s\n", res, pcap_geterr(pcap));
 		}
