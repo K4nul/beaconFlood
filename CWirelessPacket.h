@@ -8,7 +8,7 @@ enum tagParameter {
 	TAGDSPARAMETERSET = 3,
 	TAGTRAFFICINDICATIONMAP = 5,
 	TAGCOUNTRYINFORMATION = 7,
-	TAGQBSSLOADELEMENT = 11,
+	TAGQBSSLOADELE0x0104MENT = 11,
 	TAGHTCAPABILITIES = 45,
 	TAGRSNINFORMATION = 48,
 	TAGHTINFORMATION = 61,
@@ -75,6 +75,45 @@ struct ST_TAG_DS_PARAMETER : ST_TAG_PARAMETER
 	u_int8_t tagDsParameter;
 
 };
+
+struct ST_TAG_SUPPORTED_RATE : ST_TAG_PARAMETER
+{	
+	u_int8_t supportedRate[8];
+
+};
+
+
+struct ST_TAG_TRAFFIC_INDICATION_MAP : ST_TAG_PARAMETER
+{	
+
+	u_int8_t count;
+	u_int8_t period;
+	u_int8_t control;
+	u_int8_t bitmap;
+
+};
+
+
+struct ST_TAG_VENDER_SPECIFIC : ST_TAG_PARAMETER  
+{	
+	
+	u_int8_t oui[3];
+	u_int8_t ouiType;
+	u_int16_t version;
+	u_int8_t multiCipherSuiteOui[3];
+	u_int8_t multiCipherSuitetype;
+	u_int16_t unicastCipherSuiteCount;
+	u_int8_t unicastCipherSuiteOui1[3];
+	u_int8_t unicastCiphersuiteType1;
+	u_int8_t unicastCipherSuiteOui2[3];
+	u_int8_t unicastCiphersuiteType2;
+	u_int8_t unicastCipherSuiteOui3[3];
+	u_int8_t unicastCiphersuiteType3;
+
+
+};
+
+
 
 struct ST_TAG_SSID_PARAMETER : ST_TAG_PARAMETER
 {	

@@ -51,7 +51,7 @@ void CBeaconFlood::readSsidList()
         std::string strSsid;
         getline(readFile, strSsid);
 		vecSsidList.push_back(strSsid);
-        std::cout << "ssid:" <<strSsid << std::endl;    
+        std::cout << "ssid :" <<strSsid << std::endl;    
     }
 	
     readFile.close();   
@@ -63,7 +63,14 @@ void CBeaconFlood::makePacket(std::string ssid)
 {
 
 	u_int8_t packetLength = 0;
-	u_char * packet = new u_char[sizeof(ST_WIRELESS_PACKET)+sizeof(ST_TAG_DS_PARAMETER)+sizeof(ST_TAG_SSID_PARAMETER)+ssid.length()];
+	u_int8_t initLength = sizeof(ST_WIRELESS_PACKET);
+	initLength +=sizeof(ST_TAG_DS_PARAMETER);
+	initLength +=sizeof(ST_TAG_SSID_PARAMETER);
+	initLength +=sizeof(ST_TAG_SUPPORTED_RATE);
+	initLength +=sizeof(ST_TAG_TRAFFIC_INDICATION_MAP);
+	initLength +=sizeof(ST_TAG_VENDER_SPECIFIC);
+	initLength += ssid.length();
+	u_char * packet = new u_char[initLength];
 	ST_WIRELESS_PACKET * wirelessPacket = (ST_WIRELESS_PACKET*)packet;
 
 	wirelessPacket->radioTapHeader.version = 0x00;
@@ -105,20 +112,81 @@ void CBeaconFlood::makePacket(std::string ssid)
 
 	packetLength += sizeof(ST_WIRELESS_PACKET);
 	u_char * fPointer = packet + packetLength;
-	ST_TAG_DS_PARAMETER* tagDsParameter =  (ST_TAG_DS_PARAMETER*)fPointer;
-	tagDsParameter->tagNumber = tagParameter::TAGDSPARAMETERSET;
-	tagDsParameter->tagLength = 1;
-	tagDsParameter->tagDsParameter = 1;
 
-	packetLength += sizeof(ST_TAG_DS_PARAMETER);
 
-	fPointer = packet + packetLength;
 	ST_TAG_SSID_PARAMETER* tagSsidParameter = (ST_TAG_SSID_PARAMETER*)fPointer;
-
 	tagSsidParameter->tagNumber = tagParameter::TAGSSIDPARAMETERSET;
 	tagSsidParameter->tagLength = (u_int8_t)ssid.length();
 	memcpy((void*)tagSsidParameter->ssid,ssid.data(),ssid.size());
 	packetLength += sizeof(ST_TAG_PARAMETER) + tagSsidParameter->tagLength;	
+
+
+	fPointer = packet + packetLength;
+
+	ST_TAG_SUPPORTED_RATE* tagSupportedRate = (ST_TAG_SUPPORTED_RATE*)fPointer;
+	tagSupportedRate->tagNumber = tagParameter::TAGSUPPORTEDRATED;
+	tagSupportedRate->tagLength= 8;
+	tagSupportedRate->supportedRate[0] = 0x82;
+	tagSupportedRate->supportedRate[1] = 0x84;
+	tagSupportedRate->supportedRate[2] = 0x8B;
+	tagSupportedRate->supportedRate[3] = 0x96;
+	tagSupportedRate->supportedRate[4] = 0x24;
+	tagSupportedRate->supportedRate[5] = 0x30;
+	tagSupportedRate->supportedRate[6] = 0x48;
+	tagSupportedRate->supportedRate[7] = 0x6c;
+
+	packetLength += sizeof(ST_TAG_SUPPORTED_RATE);
+	
+
+	fPointer = packet + packetLength;
+
+	ST_TAG_DS_PARAMETER* tagDsParameter =  (ST_TAG_DS_PARAMETER*)fPointer;
+	tagDsParameter->tagNumber = tagParameter::TAGDSPARAMETERSET;
+	tagDsParameter->tagLength = 1;
+	tagDsParameter->tagDsParameter = 1;	
+	packetLength += sizeof(ST_TAG_DS_PARAMETER);
+
+	fPointer = packet + packetLength;
+
+	ST_TAG_TRAFFIC_INDICATION_MAP* tagTrafficIndicationMap =  (ST_TAG_TRAFFIC_INDICATION_MAP*)fPointer;
+	tagTrafficIndicationMap->tagNumber = tagParameter::TAGTRAFFICINDICATIONMAP;
+	tagTrafficIndicationMap->tagLength = 4;
+	tagTrafficIndicationMap->count = 0;
+	tagTrafficIndicationMap->period = 3;
+	tagTrafficIndicationMap->control = 0;
+	tagTrafficIndicationMap->bitmap = 0;	
+
+	packetLength += sizeof(ST_TAG_TRAFFIC_INDICATION_MAP);
+
+	fPointer = packet + packetLength;	
+
+	ST_TAG_VENDER_SPECIFIC* tagVenderSpecific =  (ST_TAG_VENDER_SPECIFIC*)fPointer;
+	tagVenderSpecific->tagNumber = tagParameter::TAGVENDORSPECIFIC;
+	tagVenderSpecific->tagLength = 0x18;
+	tagVenderSpecific->oui[0] = 0x00;
+	tagVenderSpecific->oui[1] = 0x50;
+	tagVenderSpecific->oui[2] = 0xf2;
+	tagVenderSpecific->ouiType = 0x01;
+	tagVenderSpecific->version = 0x0001;
+	tagVenderSpecific->multiCipherSuiteOui[0] = 0x00;
+	tagVenderSpecific->multiCipherSuiteOui[1] = 0x50;
+	tagVenderSpecific->multiCipherSuiteOui[2] = 0xf2;
+	tagVenderSpecific->multiCipherSuitetype = 0x04;
+	tagVenderSpecific->unicastCipherSuiteCount = 0x0001; 
+	tagVenderSpecific->unicastCipherSuiteOui1[0] = 0x00;
+	tagVenderSpecific->unicastCipherSuiteOui1[1] = 0x50;
+	tagVenderSpecific->unicastCipherSuiteOui1[2] = 0xf2;
+	tagVenderSpecific->unicastCiphersuiteType1= 0x04;
+	tagVenderSpecific->unicastCipherSuiteOui2[0] = 0x01;
+	tagVenderSpecific->unicastCipherSuiteOui2[1] = 0x00;
+	tagVenderSpecific->unicastCipherSuiteOui2[2] = 0x00;
+	tagVenderSpecific->unicastCiphersuiteType2 = 0x50;
+	tagVenderSpecific->unicastCipherSuiteOui3[0] = 0xf2;
+	tagVenderSpecific->unicastCipherSuiteOui3[1] = 0x02;
+	tagVenderSpecific->unicastCipherSuiteOui3[2] = 0x00;
+	tagVenderSpecific->unicastCiphersuiteType3 = 0x00;
+
+	packetLength += sizeof(ST_TAG_VENDER_SPECIFIC);
 
 
 	vecPacketInfo.push_back(packet);		
