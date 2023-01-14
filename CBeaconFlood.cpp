@@ -13,6 +13,9 @@ CBeaconFlood::CBeaconFlood(ST_PARAM parameter) : param(parameter)
 
 CBeaconFlood::~CBeaconFlood(){
 
+	for(u_char* i : vecPacketInfo){
+		delete i;
+	}
     pcap_close(pcap);  
 }
 
@@ -63,10 +66,9 @@ void CBeaconFlood::makePacket(std::string ssid)
 	u_char * packet = new u_char[sizeof(ST_WIRELESS_PACKET)+sizeof(ST_TAG_DS_PARAMETER)+sizeof(ST_TAG_SSID_PARAMETER)+ssid.length()];
 	ST_WIRELESS_PACKET * wirelessPacket = (ST_WIRELESS_PACKET*)packet;
 
-	printf("%p\n", packet);
-	wirelessPacket->radioTapHeader.version = 0;
-	wirelessPacket->radioTapHeader.pad = 0;
-	wirelessPacket->radioTapHeader.len = 24;
+	wirelessPacket->radioTapHeader.version = 0x00;
+	wirelessPacket->radioTapHeader.pad = 0x00;
+	wirelessPacket->radioTapHeader.len = 0x18;
 	wirelessPacket->radioTapHeader.present[0] = 0x2e; //고치기
 	wirelessPacket->radioTapHeader.present[1] = 0x40;
 	wirelessPacket->radioTapHeader.present[2] = 0x00;
@@ -75,21 +77,21 @@ void CBeaconFlood::makePacket(std::string ssid)
 	wirelessPacket->radioTapHeader.present[5] = 0x08;
 	wirelessPacket->radioTapHeader.present[6] = 0x00;
 	wirelessPacket->radioTapHeader.present[7] = 0x00;
-	wirelessPacket->radioTapHeader.flags = 00;
-	wirelessPacket->radioTapHeader.dataRate = 02;
-	wirelessPacket->radioTapHeader.channelFrequency = 2412;
-	wirelessPacket->radioTapHeader.channelFlags = 160;
+	wirelessPacket->radioTapHeader.flags = 0x00;
+	wirelessPacket->radioTapHeader.dataRate = 0x02;
+	wirelessPacket->radioTapHeader.channelFrequency = 0x096c;
+	wirelessPacket->radioTapHeader.channelFlags = 0xa0;
 	wirelessPacket->radioTapHeader.antennaSignal = -63;
-	wirelessPacket->radioTapHeader.antenna = 00;
-	wirelessPacket->radioTapHeader.rxFlags = 0000;
+	wirelessPacket->radioTapHeader.antenna = 0x00;
+	wirelessPacket->radioTapHeader.rxFlags = 0x0000;
 	wirelessPacket->radioTapHeader.antennaSignalT = -63; 
-	wirelessPacket->radioTapHeader.antennaT =  00;
-	wirelessPacket->beaconFrame.frameControl = 80;
-	wirelessPacket->beaconFrame.duration = 0000;
+	wirelessPacket->radioTapHeader.antennaT =  0x00;
+	wirelessPacket->beaconFrame.frameControl = 0x0080;
+	wirelessPacket->beaconFrame.duration = 0x0000;
 	wirelessPacket->beaconFrame.destinationAddr =  Mac("FF:FF:FF:FF:FF:FF");// MAC BD
 	wirelessPacket->beaconFrame.sourceAddr =  Mac("11:22:33:44:55:66");// MAC any
 	wirelessPacket->beaconFrame.bssid =  Mac("11:22:33:44:55:66"); // MAC any 
-	wirelessPacket->beaconFrame.seqFragNum = 0000; 
+	wirelessPacket->beaconFrame.seqFragNum = 0x0000; 
 	wirelessPacket->fixedParameter.timestamp[0] = 0xab; //고치기
 	wirelessPacket->fixedParameter.timestamp[1] = 0x45;
 	wirelessPacket->fixedParameter.timestamp[2] = 0x09;
@@ -104,7 +106,6 @@ void CBeaconFlood::makePacket(std::string ssid)
 	packetLength += sizeof(ST_WIRELESS_PACKET);
 	u_char * fPointer = packet + packetLength;
 	ST_TAG_DS_PARAMETER* tagDsParameter =  (ST_TAG_DS_PARAMETER*)fPointer;
-
 	tagDsParameter->tagNumber = tagParameter::TAGDSPARAMETERSET;
 	tagDsParameter->tagLength = 1;
 	tagDsParameter->tagDsParameter = 1;
@@ -112,12 +113,11 @@ void CBeaconFlood::makePacket(std::string ssid)
 	packetLength += sizeof(ST_TAG_DS_PARAMETER);
 
 	fPointer = packet + packetLength;
-
 	ST_TAG_SSID_PARAMETER* tagSsidParameter = (ST_TAG_SSID_PARAMETER*)fPointer;
 
 	tagSsidParameter->tagNumber = tagParameter::TAGSSIDPARAMETERSET;
-	tagSsidParameter->tagLength = ssid.length();
-	memcpy(tagSsidParameter,ssid.data(),ssid.size());
+	tagSsidParameter->tagLength = (u_int8_t)ssid.length();
+	memcpy((void*)tagSsidParameter->ssid,ssid.data(),ssid.size());
 	packetLength += sizeof(ST_TAG_PARAMETER) + tagSsidParameter->tagLength;	
 
 
@@ -125,115 +125,17 @@ void CBeaconFlood::makePacket(std::string ssid)
 	vecPacketLength.push_back(packetLength);
 
 
-	////////////////////////////////////////
-
-	// u_int8_t packetLength = 0;
-	// u_char * packet;
-	// ST_WIRELESS_PACKET * wirelessPacket = (ST_WIRELESS_PACKET*)packet;
-
-	// wirelessPacket->radioTapHeader.version = 0;
-	// wirelessPacket->radioTapHeader.pad = 0;
-	// wirelessPacket->radioTapHeader.len = 24;
-	// wirelessPacket->radioTapHeader.present[0] = 0x2e; //고치기
-	// wirelessPacket->radioTapHeader.present[1] = 0x40;
-	// wirelessPacket->radioTapHeader.present[2] = 0x00;
-	// wirelessPacket->radioTapHeader.present[3] = 0xa0;
-	// wirelessPacket->radioTapHeader.present[4] = 0x20;
-	// wirelessPacket->radioTapHeader.present[5] = 0x08;
-	// wirelessPacket->radioTapHeader.present[6] = 0x00;
-	// wirelessPacket->radioTapHeader.present[7] = 0x00;
-	// wirelessPacket->radioTapHeader.flags = 00;
-	// wirelessPacket->radioTapHeader.dataRate = 02;
-	// wirelessPacket->radioTapHeader.channelFrequency = 2412;
-	// wirelessPacket->radioTapHeader.channelFlags = 160;
-	// wirelessPacket->radioTapHeader.antennaSignal = -63;
-	// wirelessPacket->radioTapHeader.antenna = 00;
-	// wirelessPacket->radioTapHeader.rxFlags = 0000;
-	// wirelessPacket->radioTapHeader.antennaSignalT = -63; 
-	// wirelessPacket->radioTapHeader.antennaT =  00;
-	// wirelessPacket->beaconFrame.frameControl = 80;
-	// wirelessPacket->beaconFrame.duration = 0000;
-	// wirelessPacket->beaconFrame.destinationAddr =  Mac("FF:FF:FF:FF:FF:FF");// MAC BD
-	// wirelessPacket->beaconFrame.sourceAddr =  Mac("11:22:33:44:55:66");// MAC any
-	// wirelessPacket->beaconFrame.bssid =  Mac("11:22:33:44:55:66"); // MAC any 
-	// wirelessPacket->beaconFrame.seqFragNum = 0000; 
-	// wirelessPacket->fixedParameter.timestamp[0] = 0xab; //고치기
-	// wirelessPacket->fixedParameter.timestamp[1] = 0x45;
-	// wirelessPacket->fixedParameter.timestamp[2] = 0x09;
-	// wirelessPacket->fixedParameter.timestamp[3] = 0xf7;
-	// wirelessPacket->fixedParameter.timestamp[4] = 0x28;
-	// wirelessPacket->fixedParameter.timestamp[5] = 0x00;
-	// wirelessPacket->fixedParameter.timestamp[6] = 0x00;
-	// wirelessPacket->fixedParameter.timestamp[7] = 0x00;								
-	// wirelessPacket->fixedParameter.beaconInterval = 0x6400;
-	// wirelessPacket->fixedParameter.capabilityInfo = 0x0011; 
-
-	// packetLength += sizeof(ST_WIRELESS_PACKET);
-	// u_char * fPointer = packet;
-	// ST_TAG_PARAMETER* tag = ST_TAG_PARAMETER::getFirstTag(packet);	
-	// tag->tagNumber = tagParameter::TAGSSIDPARAMETERSET;
-	// tag->tagLength = ssid.length();
-	// memcpy(tag->valuePointer(tag),ssid.data(),ssid.size());
-
-	// packetLength += tag->tagLength + sizeof(ST_TAG_PARAMETER);
-
-	// tag = tag->getNextTag();
-
-	// tag->tagNumber = tagParameter::TAGSUPPORTEDRATED;
-	// tag->tagLength = 8;
-	// char supportedRate[8];
-	// supportedRate[0] = 0x82;	
-	// supportedRate[1] = 0x84;
-	// supportedRate[2] = 0x88;
-	// supportedRate[3] = 0x96;
-	// supportedRate[4] = 0x24;
-	// supportedRate[5] = 0x30;
-	// supportedRate[6] = 0x48;
-	// supportedRate[7] = 0x6C;
-
-	// packetLength += tag->tagLength + sizeof(ST_TAG_PARAMETER);
-	// memcpy(tag->valuePointer(tag),supportedRate,tag->tagLength);
-
-
-	// tag = tag->getNextTag();
-
-	// tag->tagNumber = tagParameter::TAGDSPARAMETERSET;
-	// tag->tagLength = 1;
-	// u_int8_t tagDsParameter = 1;
-
-	// packetLength += tag->tagLength + sizeof(ST_TAG_PARAMETER);	
-	// memcpy(tag->valuePointer(tag),(char*)&tagDsParameter,tag->tagLength);
-
-
-
-	// vecPacketInfo.push_back(fPointer);		
-	// vecPacketLength.push_back(packetLength);
-
-	// tag = tag->getNextTag();
-	// tag->tagNumber = tagParameter::TAGTRAFFICINDICATIONMAP;
-	// tag->tagLength = 4;
-	// pointer = (u_char*)tag->valuePointer();
-	// *pointer++ = 0;
-	// *pointer++ = 3;
-	// *pointer++ = 0;
-	// *pointer = 0;
-	// tag - tag->getNextTag();
-
-	// char vendor[] = "\xdd\x18\x00\x50\xf2\x01\x01\x00\x00\x50\xf2\x04\x01\x00\x00\x50\xf2\x04\x01\x00\x00\x50\xf2\x02\x00\x00";
-	// memcpy(tag, vendor, sizeof(vendor) -1);
-
 }
 
 void CBeaconFlood::sendPacket()
 {
-
+	// printf("%p\n",vecPacketInfo[0]);
 	for(int i = 0 ; i < vecPacketInfo.size(); i ++){
-		int res = pcap_sendpacket(pcap, reinterpret_cast<const u_char*>(&vecPacketInfo[i]), vecPacketLength[i]);
+		int res = pcap_sendpacket(pcap, reinterpret_cast<const u_char*>(vecPacketInfo[i]), vecPacketLength[i]);
 		if (res != 0) {
 			fprintf(stderr, "pcap_sendpacket return %d error=%s\n", res, pcap_geterr(pcap));
 		}
 
 	}
-
-
+	sleep(0.0005);
 }    
