@@ -74,36 +74,28 @@ void CBeaconFlood::makePacket(std::string ssid)
 	u_char * packet = new u_char[initLength];
 	u_char * fPointer = packet;
 
-	packetLength += setWirelessPacket(packet);
-
+	setWirelessPacket(packet);
+	packetLength += sizeof(ST_WIRELESS_PACKET);
 	fPointer += packetLength;
 
-
-
-	packetLength += setTagSsid(fPointer,ssid);	
-
-
+	setTagSsid(fPointer,ssid);
+	packetLength += sizeof(ST_TAG_PARAMETER) + ssid.size(); 	
 	fPointer = packet + packetLength;
 
-
-	packetLength += setTagSupportedRate(fPointer);
-	
-
+	setTagSupportedRate(fPointer);
+	packetLength += sizeof(ST_TAG_SUPPORTED_RATE);
 	fPointer = packet + packetLength;
 
-
-	packetLength += setTagDsParameter(fPointer);
-
+	setTagDsParameter(fPointer);
+	packetLength += sizeof(ST_TAG_DS_PARAMETER);
 	fPointer = packet + packetLength;
 
-
-	packetLength += setTagTrafficIndicationMap(fPointer);
-
+	setTagTrafficIndicationMap(fPointer);
+	packetLength += sizeof(ST_TAG_TRAFFIC_INDICATION_MAP);
 	fPointer = packet + packetLength;	
 
-
-
-	packetLength += setTagVenderSpecific(fPointer);
+	setTagVenderSpecific(fPointer);
+	packetLength += sizeof(ST_TAG_VENDER_SPECIFIC);
 
 
 	vecPacketInfo.push_back(packet);		
@@ -112,7 +104,7 @@ void CBeaconFlood::makePacket(std::string ssid)
 
 }
 
-unsigned long CBeaconFlood::setWirelessPacket(u_char * packet)
+void CBeaconFlood::setWirelessPacket(u_char * packet)
 {
 	ST_WIRELESS_PACKET * wirelessPacket = (ST_WIRELESS_PACKET*)packet;	
 	wirelessPacket->radioTapHeader.version = 0x00;
@@ -152,21 +144,19 @@ unsigned long CBeaconFlood::setWirelessPacket(u_char * packet)
 	wirelessPacket->fixedParameter.beaconInterval = 0x6400;
 	wirelessPacket->fixedParameter.capabilityInfo = 0x0011; 
 
-	return sizeof(ST_WIRELESS_PACKET);
+	
 }
 
-unsigned long CBeaconFlood::setTagSsid(u_char * packet, std::string ssid)
+void CBeaconFlood::setTagSsid(u_char * packet, std::string ssid)
 {
 	ST_TAG_SSID_PARAMETER* tagSsidParameter = (ST_TAG_SSID_PARAMETER*)packet;
 	tagSsidParameter->tagNumber = tagParameter::TAGSSIDPARAMETERSET;
 	tagSsidParameter->tagLength = (u_int8_t)ssid.length();
 	memcpy((void*)tagSsidParameter->ssid,ssid.data(),ssid.size());
 
-	return sizeof(ST_TAG_PARAMETER) + tagSsidParameter->tagLength;
-
 }
 
-unsigned long CBeaconFlood::setTagSupportedRate(u_char * packet)
+void CBeaconFlood::setTagSupportedRate(u_char * packet)
 {
 
 	ST_TAG_SUPPORTED_RATE* tagSupportedRate = (ST_TAG_SUPPORTED_RATE*)packet;
@@ -181,22 +171,18 @@ unsigned long CBeaconFlood::setTagSupportedRate(u_char * packet)
 	tagSupportedRate->supportedRate[6] = 0x48;
 	tagSupportedRate->supportedRate[7] = 0x6c;
 
-	return sizeof(ST_TAG_SUPPORTED_RATE);
-
 }
 
-unsigned long CBeaconFlood::setTagDsParameter(u_char * packet)
+void CBeaconFlood::setTagDsParameter(u_char * packet)
 {
 	ST_TAG_DS_PARAMETER* tagDsParameter =  (ST_TAG_DS_PARAMETER*)packet;
 	tagDsParameter->tagNumber = tagParameter::TAGDSPARAMETERSET;
 	tagDsParameter->tagLength = 1;
 	tagDsParameter->tagDsParameter = 1;		
 
-	return sizeof(ST_TAG_DS_PARAMETER);
-
 }
 
-unsigned long CBeaconFlood::setTagTrafficIndicationMap(u_char * packet)
+void CBeaconFlood::setTagTrafficIndicationMap(u_char * packet)
 {
 
 	ST_TAG_TRAFFIC_INDICATION_MAP* tagTrafficIndicationMap =  (ST_TAG_TRAFFIC_INDICATION_MAP*)packet;
@@ -207,11 +193,9 @@ unsigned long CBeaconFlood::setTagTrafficIndicationMap(u_char * packet)
 	tagTrafficIndicationMap->control = 0;
 	tagTrafficIndicationMap->bitmap = 0;	
 
-	return sizeof(ST_TAG_TRAFFIC_INDICATION_MAP);
-
 }
 
-unsigned long CBeaconFlood::setTagVenderSpecific(u_char * packet)
+void CBeaconFlood::setTagVenderSpecific(u_char * packet)
 {
 
 	ST_TAG_VENDER_SPECIFIC* tagVenderSpecific =  (ST_TAG_VENDER_SPECIFIC*)packet;
@@ -239,8 +223,6 @@ unsigned long CBeaconFlood::setTagVenderSpecific(u_char * packet)
 	tagVenderSpecific->unicastCipherSuiteOui3[1] = 0x02;
 	tagVenderSpecific->unicastCipherSuiteOui3[2] = 0x00;
 	tagVenderSpecific->unicastCiphersuiteType3 = 0x00;	
-
-	return sizeof(ST_TAG_VENDER_SPECIFIC);
 
 }
 

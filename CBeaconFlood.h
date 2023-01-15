@@ -50,10 +50,10 @@ private:
     void readSsidList();
     void makePacket(std::string ssid);
     void sendPacket();    
-    unsigned long setWirelessPacket(u_char * packet);
-    unsigned long setTagSsid(u_char * packet, std::string ssid);
-    unsigned long setTagSupportedRate(u_char * packet);
-    unsigned long setTagDsParameter(u_char * packet);
-    unsigned long setTagTrafficIndicationMap(u_char * packet);
-    unsigned long setTagVenderSpecific(u_char * packet);    
+    void setWirelessPacket(u_char * packet);
+    void setTagSsid(u_char * packet, std::string ssid);
+    void setTagSupportedRate(u_char * packet);
+    void setTagDsParameter(u_char * packet);
+    void setTagTrafficIndicationMap(u_char * packet);
+    void setTagVenderSpecific(u_char * packet);    
 };
