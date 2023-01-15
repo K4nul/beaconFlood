@@ -112,6 +112,7 @@ void CBeaconFlood::makePacket(std::string ssid)
 	wirelessPacket->fixedParameter.capabilityInfo = 0x0011; 
 
 	packetLength += sizeof(ST_WIRELESS_PACKET);
+
 	u_char * fPointer = packet + packetLength;
 
 
