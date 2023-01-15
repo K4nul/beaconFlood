@@ -28,6 +28,7 @@ int CBeaconFlood::beaconFlood()
 	{
 		makePacket(ssid);
 	}
+
 	while(1)
 	sendPacket();
 
@@ -96,8 +97,8 @@ void CBeaconFlood::makePacket(std::string ssid)
 	wirelessPacket->beaconFrame.frameControl = 0x0080;
 	wirelessPacket->beaconFrame.duration = 0x0000;
 	wirelessPacket->beaconFrame.destinationAddr =  Mac("FF:FF:FF:FF:FF:FF");// MAC BD
-	wirelessPacket->beaconFrame.sourceAddr =  Mac("11:22:33:44:55:66");// MAC any
-	wirelessPacket->beaconFrame.bssid =  Mac("11:22:33:44:55:66"); // MAC any 
+	wirelessPacket->beaconFrame.sourceAddr =  Mac("00:11:22:33:44:55");// MAC any
+	wirelessPacket->beaconFrame.bssid =  Mac("00:11:22:33:44:55"); // MAC any 
 	wirelessPacket->beaconFrame.seqFragNum = 0x0000; 
 	wirelessPacket->fixedParameter.timestamp[0] = 0xab; //고치기
 	wirelessPacket->fixedParameter.timestamp[1] = 0x45;
