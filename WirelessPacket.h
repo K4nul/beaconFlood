@@ -1,4 +1,4 @@
-#include "CMac.h"
+#include "Mac.h"
 #include <iostream>
 
 

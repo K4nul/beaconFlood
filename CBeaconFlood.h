@@ -1,5 +1,5 @@
-#include "CMac.h"
-#include "CWirelessPacket.h"
+#include "Mac.h"
+#include "WirelessPacket.h"
 #include <iostream>
 #include <fstream>
 #include <string> 
