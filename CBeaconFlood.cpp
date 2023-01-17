@@ -64,37 +64,37 @@ void CBeaconFlood::makePacket(std::string ssid)
 {
 
 	u_int8_t packetLength = 0;
-	u_int8_t initLength = sizeof(ST_WIRELESS_PACKET);
-	initLength +=sizeof(ST_TAG_DS_PARAMETER);
-	initLength +=sizeof(ST_TAG_SSID_PARAMETER);
-	initLength +=sizeof(ST_TAG_SUPPORTED_RATE);
-	initLength +=sizeof(ST_TAG_TRAFFIC_INDICATION_MAP);
-	initLength +=sizeof(ST_TAG_VENDER_SPECIFIC);
-	initLength += ssid.length();
-	u_char * packet = new u_char[initLength];
-	u_char * fPointer = packet;
+	u_int8_t packetSize = sizeof(ST_WIRELESS_PACKET);
+	packetSize +=sizeof(ST_TAG_DS_PARAMETER);
+	packetSize +=sizeof(ST_TAG_SSID_PARAMETER);
+	packetSize +=sizeof(ST_TAG_SUPPORTED_RATE);
+	packetSize +=sizeof(ST_TAG_TRAFFIC_INDICATION_MAP);
+	packetSize +=sizeof(ST_TAG_VENDER_SPECIFIC);
+	packetSize += ssid.length();
+	u_char * packet = new u_char[packetSize];
+	u_char * currentPosition = packet;
 
 	setWirelessPacket(packet);
 	packetLength += sizeof(ST_WIRELESS_PACKET);
-	fPointer += packetLength;
+	currentPosition += packetLength;
 
-	setTagSsid(fPointer,ssid);
+	setTagSsid(currentPosition,ssid);
 	packetLength += sizeof(ST_TAG_PARAMETER) + ssid.size(); 	
-	fPointer = packet + packetLength;
+	currentPosition = packet + packetLength;
 
-	setTagSupportedRate(fPointer);
+	setTagSupportedRate(currentPosition);
 	packetLength += sizeof(ST_TAG_SUPPORTED_RATE);
-	fPointer = packet + packetLength;
+	currentPosition = packet + packetLength;
 
-	setTagDsParameter(fPointer);
+	setTagDsParameter(currentPosition);
 	packetLength += sizeof(ST_TAG_DS_PARAMETER);
-	fPointer = packet + packetLength;
+	currentPosition = packet + packetLength;
 
-	setTagTrafficIndicationMap(fPointer);
+	setTagTrafficIndicationMap(currentPosition);
 	packetLength += sizeof(ST_TAG_TRAFFIC_INDICATION_MAP);
-	fPointer = packet + packetLength;	
+	currentPosition = packet + packetLength;	
 
-	setTagVenderSpecific(fPointer);
+	setTagVenderSpecific(currentPosition);
 	packetLength += sizeof(ST_TAG_VENDER_SPECIFIC);
 
 
