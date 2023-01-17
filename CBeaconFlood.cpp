@@ -14,7 +14,7 @@ CBeaconFlood::CBeaconFlood(ST_PARAM parameter) : param(parameter)
 CBeaconFlood::~CBeaconFlood(){
 
 	for(u_char* i : vecPacketInfo){
-		delete i;
+		delete[] i;
 	}
     pcap_close(pcap);  
 }
