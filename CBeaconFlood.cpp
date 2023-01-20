@@ -1,6 +1,28 @@
 #include "CBeaconFlood.h"
 
-CBeaconFlood::CBeaconFlood(ST_PARAM parameter) : param(parameter)
+
+void CParam::usage() 
+{
+	printf("syntax : beacon-flood <interface> <ssid-list-file>\n");
+	printf("sample : beacon-flood mon0 ssid-list.txt");
+}
+
+bool CParam::parse(int argc, char* argv[]) 
+{
+	if (argc != 3) {
+		usage();
+		return false;
+	}
+	dev = argv[1];
+	ssidListFile = argv[2];
+
+	return true;
+}
+
+
+
+
+CBeaconFlood::CBeaconFlood(CParam parameter) : param(parameter)
 {
 	char errbuf[PCAP_ERRBUF_SIZE];
 	pcap = pcap_open_live(param.dev, 0, 0, 0, errbuf);

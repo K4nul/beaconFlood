@@ -19,10 +19,14 @@ enum status
 };
 
 
-struct ST_PARAM
+class CParam
 {
+public:
 	char * dev;
     char * ssidListFile;
+
+    bool parse(int argc, char* argv[]);
+    void usage();
 };
 
 
@@ -35,12 +39,12 @@ private:
     std::vector<u_char*> vecPacketInfo;
     std::vector<u_int8_t> vecPacketLength;
     
-    ST_PARAM param;
+    CParam param;
     
 
 public:
 
-	CBeaconFlood(ST_PARAM parameter);
+	CBeaconFlood(CParam parameter);
 	~CBeaconFlood();
     int beaconFlood();
 

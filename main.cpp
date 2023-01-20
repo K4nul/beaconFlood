@@ -16,28 +16,14 @@
 6. 패킷 전송 (FF:FF:FF:FF:FF:FF)
 ***/
 
-void usage() 
-{
-	printf("syntax : beacon-flood <interface> <ssid-list-file>\n");
-	printf("sample : beacon-flood mon0 ssid-list.txt");
-}
 
-bool parse(int argc, char* argv[], ST_PARAM &parameter) 
-{
-	if (argc != 3) {
-		usage();
-		return false;
-	}
-	parameter.dev = argv[1];
-	parameter.ssidListFile = argv[2];
 
-	return true;
-}
+
 
 int main(int argc, char* argv[]) 
 {
-	ST_PARAM parameter;
-	if (!parse(argc, argv, parameter))
+	CParam parameter;
+	if (!parameter.parse(argc, argv))
 		return -1;
 
 	CBeaconFlood CBeaconFlood(parameter);
